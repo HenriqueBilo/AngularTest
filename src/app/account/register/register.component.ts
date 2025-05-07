@@ -1,11 +1,81 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChildren } from '@angular/core';
+import { FormBuilder, FormControl, FormControlName, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { User } from '../models/user';
+import { AccountService } from '../services/account.service';
+import { DisplayMessage, GenericValidator, ValidationMessages } from '../../useful/generic-form-validation';
+import { rangeLengthValidator, equalToValidator } from '../../validators/custom-validators';
+import { fromEvent, merge, Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './register.component.html',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit, AfterViewInit {
+  
+  @ViewChildren(FormControlName, { read: ElementRef }) formInputElements: ElementRef[] = [];
 
+  registerForm: FormGroup = new FormGroup({});
+  user!: User;
+  errors: any[] = [];
+
+  genericValidator!: GenericValidator;
+  validationMessages: ValidationMessages = {};
+  displayMessage: DisplayMessage = {};
+
+  constructor(private fb: FormBuilder, private accountService: AccountService) {
+    this.validationMessages = {
+      email: {
+        required: 'Enter your email',
+        email: 'Invalid email'
+      },
+      password: {
+        required: 'Enter your password',
+        rangeLength: 'The password must be between 6 and 15 characters'
+      },
+      confirmPassword: {
+        required: 'Re-enter your password',
+        rangeLength: 'The password must be between 6 and 15 characters',
+        equalTo: 'Passwords do not match'
+      }
+    };
+
+    this.genericValidator = new GenericValidator(this.validationMessages);
+  }
+
+  ngOnInit(): void {
+
+    let formPassword = new FormControl('', [Validators.required, rangeLengthValidator(6,15)]);
+    let formConfirmPassword = new FormControl('', [Validators.required, rangeLengthValidator(6,15), equalToValidator(formPassword)]);
+
+    this.registerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: formPassword,
+      confirmPassword: formConfirmPassword
+    });
+  }
+
+  ngAfterViewInit(): void {
+    let controlBlurs: Observable<any>[] = this.formInputElements
+      .map((formControl: ElementRef) => fromEvent(formControl.nativeElement, 'blur'));
+
+    merge(...controlBlurs).subscribe(() => {
+      this.displayMessage = this.genericValidator.processMessages(this.registerForm);
+    })
+  }
+
+  addAccount() {
+    if(this.registerForm.dirty && this.registerForm.valid) {
+      this.user = Object.assign({}, this.user, this.registerForm.value);
+
+      this.accountService.registerUser(this.user);
+    }
+  }
 }
