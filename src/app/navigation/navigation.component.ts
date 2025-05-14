@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { FooterComponent } from "./footer/footer.component";
 import { MenuComponent } from "./menu/menu.component";
+import { MenuLoginComponent } from "./menu-login/menu-login.component";
 
 @Component({
     selector: 'app-navigation',

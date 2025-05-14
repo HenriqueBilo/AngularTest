@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import { MenuLoginComponent } from "../menu-login/menu-login.component";
 
 
 @Component({
@@ -9,7 +10,8 @@ import { NgbModule} from "@ng-bootstrap/ng-bootstrap";
     templateUrl: './menu.component.html',
     imports: [
         NgbModule,
-        RouterModule
+        RouterModule,
+        MenuLoginComponent
     ],
 })
 export class MenuComponent {

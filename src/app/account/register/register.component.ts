@@ -6,6 +6,7 @@ import { DisplayMessage, GenericValidator, ValidationMessages } from '../../usef
 import { rangeLengthValidator, equalToValidator } from '../../validators/custom-validators';
 import { fromEvent, merge, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -30,7 +31,8 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   validationMessages: ValidationMessages = {};
   displayMessage: DisplayMessage = {};
 
-  constructor(private fb: FormBuilder, private accountService: AccountService) {
+  constructor(private fb: FormBuilder, private accountService: AccountService,
+             private router: Router) {
     this.validationMessages = {
       email: {
         required: 'Enter your email',
@@ -75,7 +77,24 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     if(this.registerForm.dirty && this.registerForm.valid) {
       this.user = Object.assign({}, this.user, this.registerForm.value);
 
-      this.accountService.registerUser(this.user);
+      this.accountService.registerUser(this.user)
+        .subscribe({
+          next: success => this.processSuccess(success),
+          error: failure => this.processFailure(failure)
+        });
     }
+  }
+
+  processSuccess(response: any) {
+    this.registerForm.reset();
+    this.errors = [];
+
+    this.accountService.LocalStorage.saveUserLocalData(response);
+
+    this.router.navigate(['/home']);
+  }
+
+  processFailure(fail: any) {
+    this.errors = fail.error.errors;
   }
 }
