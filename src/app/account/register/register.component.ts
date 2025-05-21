@@ -109,6 +109,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
 
   processFailure(fail: any) {
     this.errors = fail.error.errors;
-    this.toastr.error('An error has appeared!', 'Ooops :(')
+    this.toastr.error('An error occurred!', 'Ooops :(')
   }
 }
