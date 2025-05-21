@@ -34,6 +34,8 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   validationMessages: ValidationMessages = {};
   displayMessage: DisplayMessage = {};
 
+  unsavedChanges: boolean;
+
   constructor(private fb: FormBuilder, private accountService: AccountService,
              private router: Router, private toastr: ToastrService) {
     this.validationMessages = {
@@ -73,6 +75,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
 
     merge(...controlBlurs).subscribe(() => {
       this.displayMessage = this.genericValidator.processMessages(this.registerForm);
+      this.unsavedChanges = true;
     })
   }
 
@@ -85,6 +88,8 @@ export class RegisterComponent implements OnInit, AfterViewInit {
           next: success => this.processSuccess(success),
           error: failure => this.processFailure(failure)
         });
+
+        this.unsavedChanges = false;
     }
   }
 
