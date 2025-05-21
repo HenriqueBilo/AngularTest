@@ -1,13 +1,16 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChildren } from '@angular/core';
 import { FormBuilder, FormControl, FormControlName, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+
+import { fromEvent, merge, Observable } from 'rxjs';
+
+import { ToastrService } from 'ngx-toastr';
+
 import { User } from '../models/user';
 import { AccountService } from '../services/account.service';
 import { DisplayMessage, GenericValidator, ValidationMessages } from '../../useful/generic-form-validation';
 import { rangeLengthValidator, equalToValidator } from '../../validators/custom-validators';
-import { fromEvent, merge, Observable } from 'rxjs';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-
 
 @Component({
   selector: 'app-register',
@@ -32,7 +35,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   displayMessage: DisplayMessage = {};
 
   constructor(private fb: FormBuilder, private accountService: AccountService,
-             private router: Router) {
+             private router: Router, private toastr: ToastrService) {
     this.validationMessages = {
       email: {
         required: 'Enter your email',
@@ -91,10 +94,16 @@ export class RegisterComponent implements OnInit, AfterViewInit {
 
     this.accountService.LocalStorage.saveUserLocalData(response);
 
-    this.router.navigate(['/home']);
+    let toast = this.toastr.success('Successfully registered!', 'Welcome!')
+    if(toast) {
+      toast.onHidden.subscribe(() => {
+        this.router.navigate(['/home']);
+      })
+    }
   }
 
   processFailure(fail: any) {
     this.errors = fail.error.errors;
+    this.toastr.error('An error has appeared!', 'Ooops :(')
   }
 }
